@@ -1,25 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useLayoutEffect, useState } from "react";
+import { SideBar } from "./layout/sidebar";
+import { Container } from "./styles";
+import data from "./data.json";
+import { MovieI } from "./types";
+import { FeaturedMovie } from "./components/featured-movie";
+import { TrendingNow } from "./components/trending-now";
 
 function App() {
+  const [movies, setMovies] = useState<{
+    Featured: MovieI;
+    TrendingNow: MovieI[];
+  }>(data); 
+
+  useLayoutEffect(() => {
+    const movieFromStorage = localStorage.getItem('featured-movie');
+    if(movieFromStorage) {
+      setMovies({
+        ...movies,
+        Featured: JSON.parse(movieFromStorage)
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container className="App">
+      <SideBar />
+      <FeaturedMovie movie={movies.Featured} />
+      <TrendingNow
+        movies={movies.TrendingNow}
+        onSelection={(movie) => {
+          localStorage.setItem('featured-movie', JSON.stringify(movie))
+          setMovies({ ...movies, Featured: movie })
+        }}
+      />
+    </Container>
   );
 }
 
